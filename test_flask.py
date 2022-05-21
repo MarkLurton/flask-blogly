@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from app import app
-from models import db, User
+from models import db, User, Post
 
 # Use test database and don't clutter tests with SQL
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///blogly_test'
@@ -21,7 +21,7 @@ class UserViewsTestCase(TestCase):
     """Tests for views for Pets."""
 
     def setUp(self):
-        """Add sample pet."""
+        """Add sample user."""
 
         User.query.delete()
 
@@ -29,11 +29,27 @@ class UserViewsTestCase(TestCase):
         db.session.add(user)
         db.session.commit()
 
+        Post.query.delete()
+
+        post = Post(title="Test_Title", content="Test_Content", user_id=user.id)
+
+        db.session.add(post)
+        db.session.commit()
+
+
         self.user_id = user.id
         self.user = user
 
+        self.post_id = post.id
+        self.post = post
+
     def tearDown(self):
         """Clean up any fouled transaction."""
+        self.post.title = "Test_Title"
+        self.post.content = "Test_Content"
+
+        db.session.add(self.post)
+        db.session.commit()
 
         db.session.rollback()
 
@@ -70,3 +86,45 @@ class UserViewsTestCase(TestCase):
 
             self.assertEqual(resp.status_code, 200)
             self.assertIn("Edit User Info", html)
+    
+    def test_show_new_post_form(self):
+        with app.test_client() as client:
+            resp = client.get(f"/users/{self.user_id}/posts/new")
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Add Post for Test User', html)
+    
+    def test_submit_new_post(self):
+        with app.test_client() as client:
+            d = { "title" : "Test_Title_2", "content" : "Test_Content_2", "user_id" : self.user.id }
+            resp = client.post(f"/users/{self.user_id}/posts/new", data=d, follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Test_Title_2', html)
+    
+    def test_display_post(self):
+        with app.test_client() as client:
+            resp = client.get(f"/posts/{self.post_id}")
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Test_Title', html)
+    
+    def test_edit_post_form(self):
+        with app.test_client() as client:
+            resp = client.get(f"/posts/{self.post_id}/edit")
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Edit Post', html)
+    
+    def test_edit_post(self):
+        with app.test_client() as client:
+            d = { "title" : "Test_Edit", "content" : "Test_Content"}
+            resp = client.post(f"/posts/{self.post_id}/edit", data=d, follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Test_Edit', html)

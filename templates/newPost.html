@@ -1,0 +1,19 @@
+{% extends 'base.html' %}{% block title %}New Post{% endblock %} {% block
+content %}
+<h1 id="create-user-heading">Add Post for {{user.get_full_name()}}</h1>
+<form action="/users/{{user.id}}/posts/new" method="POST" class="info-form">
+  <label for="title">Title</label>
+  <input type="text" name="title" required />
+  <label for="content">Content</label>
+  <textarea name="content" rows="3" required></textarea>
+  <button>Add Post</button>
+  <button
+    id="cancel"
+    formaction="/users/{{user.id}}"
+    formmethod="GET"
+    formnovalidate
+  >
+    Cancel
+  </button>
+</form>
+{% endblock %}

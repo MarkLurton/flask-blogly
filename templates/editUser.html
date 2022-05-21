@@ -8,14 +8,19 @@ content %}
     name="first_name"
     placeholder="Enter a first name"
     value="{{user.first_name}}"
+    required
   />
   <label for="last_name">Last Name</label>
+  {% if user.last_name %}
   <input
     type="text"
     name="last_name"
     placeholder="Enter a last name"
     value="{{user.last_name}}"
   />
+  {% else %}
+  <input type="text" name="last_name" placeholder="Enter a last name" />
+  {% endif %}
   <label for="image_url">Image URL</label>
   <input
     type="text"
@@ -24,7 +29,12 @@ content %}
     value="{{user.image_url}}"
   />
   <button id="save">Save</button>
-  <button id="cancel" formaction="/users/{{user.id}}" formmethod="GET">
+  <button
+    id="cancel"
+    formaction="/users/{{user.id}}"
+    formmethod="GET"
+    formnovalidate
+  >
     Cancel
   </button>
 </form>
