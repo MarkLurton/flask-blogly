@@ -6,6 +6,13 @@ content %}
   <input type="text" name="title" value="{{post.title}}" required />
   <label for="content">Content</label>
   <textarea name="content" rows="3" required>{{post.content}}</textarea>
+  {% for tag in tags %}
+  <label for="tag">{{tag.name}}</label>
+  {% if tag in post.tags %}
+  <input type="checkbox" name="tag" value="{{tag.id}}" checked />
+  {% else %}
+  <input type="checkbox" name="tag" value="{{tag.id}}" />
+  {% endif %} {% endfor %}
   <button id="save">Save</button>
   <button
     id="cancel"

@@ -6,6 +6,12 @@ content %}
   <input type="text" name="title" required />
   <label for="content">Content</label>
   <textarea name="content" rows="3" required></textarea>
+  {% for tag in tags %}
+  <span class="tags-form">
+    <label for="tag">{{tag.name}}</label>
+    <input type="checkbox" name="tag" value="{{tag.id}}" />
+  </span>
+  {% endfor %}
   <button>Add Post</button>
   <button
     id="cancel"

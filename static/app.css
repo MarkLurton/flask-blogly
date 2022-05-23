@@ -23,8 +23,7 @@ input {
 }
 
 img {
-  width: 30%;
-  max-width: 250px;
+  width: 100%;
 }
 
 button:hover {
@@ -38,4 +37,22 @@ span {
 
 span button {
   margin-right: 10px;
+}
+
+a {
+  margin-right: 5px;
+}
+
+aside {
+  width: 30%;
+  max-width: 150px;
+  padding-left: 15px;
+  margin-left: 15px;
+  float: left;
+  margin-right: 25px;
+}
+
+.tags-form {
+  align-items: left;
+  margin-left: 30%;
 }

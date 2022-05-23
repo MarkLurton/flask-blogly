@@ -30,6 +30,7 @@ class User(db.Model):
                             nullable = True,
                             default = 'https://t4.ftcdn.net/jpg/00/64/67/63/360_F_64676383_LdbmhiNM6Ypzb3FM4PPuFP9rHe7ri8Ju.jpg')
     def get_full_name(self):
+        """Return full name of user"""
         if self.last_name:
             return self.first_name + ' ' + self.last_name 
         else:
@@ -59,6 +60,7 @@ class Post(db.Model):
     user = db.relationship('User', backref=db.backref('posts', cascade='all, delete-orphan'))
 
     def convert_created_at(self):
+        """Convert created at timestamp to more readable format"""
         f = "%b %d %Y %r"
 
         timestamp = self.created_at
@@ -77,3 +79,29 @@ class Post(db.Model):
 
         return cls.query.order_by(Post.created_at.desc()).limit(5).all()
 
+class Tag(db.Model):
+    """SQLAlchemy tags Model"""
+
+    __tablename__ = 'tags'
+
+    id = db.Column(db.Integer,
+                   primary_key=True,
+                   autoincrement=True)
+    
+    name = db.Column(db.Text,
+                     unique=True)
+
+    posts = db.relationship('Post', secondary='posts_tags', backref='tags')
+
+class PostTag(db.Model):
+    """SQLAlchemy poststags Model"""
+
+    __tablename__ = 'posts_tags'
+
+    post_id = db.Column(db.Integer,
+                        db.ForeignKey('posts.id', ondelete='CASCADE'),
+                        primary_key=True)
+    
+    tag_id = db.Column(db.Integer,
+                       db.ForeignKey('tags.id', ondelete='CASCADE'),
+                       primary_key=True)

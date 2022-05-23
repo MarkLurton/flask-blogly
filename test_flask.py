@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from app import app
-from models import db, User, Post
+from models import db, User, Post, Tag, PostTag
 
 # Use test database and don't clutter tests with SQL
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///blogly_test'
@@ -36,6 +36,19 @@ class UserViewsTestCase(TestCase):
         db.session.add(post)
         db.session.commit()
 
+        Tag.query.delete()
+
+        tag = Tag(name='Test_Tag')
+
+        db.session.add(tag)
+        db.session.commit()
+
+        PostTag.query.delete()
+
+        post_tag = PostTag(post_id=post.id, tag_id=tag.id)
+
+        db.session.add(post_tag)
+        db.session.commit()
 
         self.user_id = user.id
         self.user = user
@@ -43,12 +56,18 @@ class UserViewsTestCase(TestCase):
         self.post_id = post.id
         self.post = post
 
+        self.tag_id = tag.id
+        self.tag = tag
+
     def tearDown(self):
         """Clean up any fouled transaction."""
         self.post.title = "Test_Title"
         self.post.content = "Test_Content"
 
+        self.tag.name = "Test_Tag"
+
         db.session.add(self.post)
+        db.session.add(self.tag)
         db.session.commit()
 
         db.session.rollback()
@@ -128,3 +147,53 @@ class UserViewsTestCase(TestCase):
 
             self.assertEqual(resp.status_code, 200)
             self.assertIn('Test_Edit', html)
+    
+    def test_view_tags(self):
+        with app.test_client() as client:
+            resp = client.get("/tags")
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Tags', html)
+
+    def test_view_tag_details(self):
+        with app.test_client() as client:
+            resp = client.get(f"/tags/{self.tag_id}")
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn(self.tag.name, html)
+
+    def test_view_new_tag_form(self):
+        with app.test_client() as client:
+            resp = client.get("/tags/new")
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Create a tag', html)
+    
+    def test_submit_new_tag(self):
+        with app.test_client() as client:
+            d = { 'tag_name' : 'TestTag2'}
+            resp = client.post("/tags/new", data=d, follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('TestTag2', html)
+
+    def test_view_edit_tag_form(self):
+        with app.test_client() as client:
+            resp = client.get(f"/tags/{self.tag_id}/edit")
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn(f'Edit {self.tag.name}', html)
+
+    def test_submit_tag_edit(self):
+        with app.test_client() as client:
+            d = { 'tag_name' : 'Test_Tag_Edit'}
+            resp = client.post(f"/tags/{self.tag_id}/edit", data=d, follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Test_Tag_Edit', html)

@@ -1,0 +1,22 @@
+{% extends 'base.html' %}{% block title %}{{tag.name.capitalize()}}{% endblock
+%} {% block content %}
+<div id="user">
+  <h1>{{tag.name}}</h1>
+  <ul>
+    {% for post in tag.posts %}
+    <li>
+      <a href="/posts/{{post.id}}"> {{post.title}} </a>
+    </li>
+    {% endfor %}
+  </ul>
+  <span>
+    <a href="/tags/{{tag.id}}/edit"><button id="edit">Edit</button></a>
+    <form action="/tags/{{tag.id}}/delete" method="POST">
+      <button id="delete">Delete</button>
+    </form>
+  </span>
+  <span>
+    <a href="/tags"><button id="back">Go Back</button></a>
+  </span>
+</div>
+{% endblock %}

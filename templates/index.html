@@ -14,7 +14,13 @@
   {% for post in posts %}
   <span>{{post.title}}</span>
   <p>{{post.content}}</p>
+  <span class="tags">
+    {% for tag in post.tags %}
+    <a href="/tags/{{tag.id}}">{{tag.name}}</a>
+    {% endfor %}
+  </span>
   <span>By {{post.user.get_full_name()}} on {{post.convert_created_at()}}</span>
   {% endfor %}
 </ul>
+<a href="/tags"><button>View tags</button></a>
 {% endblock %}
